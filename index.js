@@ -8,19 +8,19 @@ var myQrSettings = {text:'', width: eachSide, height: eachSide};
 //New QRCode object using above params
 //var fancySquare = new QRcode($('#qrLandingZone'),myQrSettings)
 
-var input = document.querySelector('#myInputBox');
+var inputSelector = document.querySelector('#myInputBox');
 
 // input.addEventListener('input', function() {
 //     processAllInputs();
 // });
-input.addEventListener('input', () => {processAllInputs()} );
+inputSelector.addEventListener('input', () => {processAllInputs()} );
 
 // ################### END EVENT LISTENERS ####################
 // See "https://codepen.io/hchiam/pen/BeMQZe" for the working inspiration of this.
 function processAllInputs() {    
     $('#qrLandingZone').empty(); //empty the element if there's already something there.
     // $('#qrcode').qrcode($('#myInputBox').val());
-    $('#qrLandingZone').qrcode($('#myInputBox').val());
+    $('#qrLandingZone').genQR($('#myInputBox').val());
     
 };
 
@@ -45,7 +45,7 @@ function processAllInputs() {
      */
 
 (function (QRCodeGenerator) { 
-    QRCodeGenerator.fn.qrcode = function (h) { 
+    QRCodeGenerator.fn.genQR = function (h) { 
         var s; 
         function u(row) { 
             this.mode = s; 
@@ -219,7 +219,7 @@ function processAllInputs() {
         }, 
         getErrorCorrectPolynomial: function (row) { 
             for (var col = new QR8bitByte([1], 0), d = 0; d < row; d++)
-                col = col.multiply(new QR8bitByte([1, l.gexp(d)], 0)); return col 
+                col = col.multiply(new QR8bitByte([1, QRMath.gexp(d)], 0)); return col 
         }, 
         getLengthInBits: function (row, col) { 
             if (1 <= col && 10 > col) switch (row) { 
@@ -236,21 +236,30 @@ function processAllInputs() {
             } 
             else throw Error("type:" + col); 
         }, 
-        getLostPoint: function (row) { 
-            for (var col = row.getModuleCount(), d = 0, b = 0; b < col; b++)
+        getLostPoint: function (qrCode) { 
+            for (var col = qrCode.getModuleCount(), d = 0, b = 0; b < col; b++)
                 for (var e = 0; e < col; e++) { 
-                    for (var f = 0, i = row.isDark(b, e), g = -1; 1 >= g; g++)
+                    for (var f = 0, i = qrCode.isDark(b, e), g = -1; 1 >= g; g++)
                         if (!(0 > b + g || col <= b + g)) 
                             for (var h = -1; 1 >= h; h++)
-                                0 > e + h || col <= e + h || 0 == g && 0 == h || i == row.isDark(b + g, e + h) && f++; 
+                                0 > e + h || col <= e + h || 0 == g && 0 == h || i == qrCode.isDark(b + g, e + h) && f++; 
                                 5 < f && (d += 3 + f - 5) 
-                } 
+                }
                 for (b = 0; b < col - 1; b++)
                     for (e = 0; e < col - 1; e++)
-        if (f = 0, row.isDark(b, e) && f++, row.isDark(b + 1, e) && f++, row.isDark(b, e + 1) && f++, row.isDark(b + 1, e + 1) && f++, 0 == f || 4 == f) d += 3; for (b = 0; b < col; b++)for (e = 0; e < col - 6; e++)row.isDark(b, e) && !row.isDark(b, e + 1) && row.isDark(b, e + 2) && row.isDark(b, e + 3) && row.isDark(b, e + 4) && !row.isDark(b, e + 5) && row.isDark(b, e + 6) && (d += 40); for (e = 0; e < col; e++)for (b = 0; b < col - 6; b++)row.isDark(b, e) && !row.isDark(b + 1, e) && row.isDark(b + 2, e) && row.isDark(b + 3, e) && row.isDark(b + 4, e) && !row.isDark(b + 5, e) && row.isDark(b + 6, e) && (d += 40); for (e = f = 0; e < col; e++)for (b = 0; b < col; b++)row.isDark(b, e) && f++; row = Math.abs(100 * f / col / col - 50) / 5; return d + 10 * row } }, l = { glog: function (row) { if (1 > row) throw Error("glog(" + row + ")"); return l.LOG_TABLE[row] }, gexp: function (row) { for (; 0 > row;)row += 255; for (; 256 <= row;)row -= 255; return l.EXP_TABLE[row] }, EXP_TABLE: Array(256), LOG_TABLE: Array(256) }, m = 0; 8 > m; m++)l.EXP_TABLE[m] = 1 << m; for (m = 8; 256 > m; m++)l.EXP_TABLE[m] = l.EXP_TABLE[m - 4] ^ l.EXP_TABLE[m - 5] ^ l.EXP_TABLE[m - 6] ^ l.EXP_TABLE[m - 8]; for (m = 0; 255 > m; m++)l.LOG_TABLE[l.EXP_TABLE[m]] = m; QR8bitByte.prototype = { get: function (row) { return this.num[row] }, getLength: function () { return this.num.length }, multiply: function (row) { for (var col = Array(this.getLength() + row.getLength() - 1), d = 0; d < this.getLength(); d++)for (var b = 0; b < row.getLength(); b++)col[d + b] ^= l.gexp(l.glog(this.get(d)) + l.glog(row.get(b))); return new QR8bitByte(col, 0) }, mod: function (row) { if (0 > this.getLength() - row.getLength()) return this; for (var col = l.glog(this.get(0)) - l.glog(row.get(0)), d = Array(this.getLength()), b = 0; b < this.getLength(); b++)d[b] = this.get(b); for (b = 0; b < row.getLength(); b++)d[b] ^= l.gexp(l.glog(row.get(b)) + col); return (new QR8bitByte(d, 0)).mod(row) } }; p.RS_BLOCK_TABLE = [[1, 26, 19], [1, 26, 16], [1, 26, 13], [1, 26, 9], [1, 44, 34], [1, 44, 28], [1, 44, 22], [1, 44, 16], [1, 70, 55], [1, 70, 44], [2, 35, 17], [2, 35, 13], [1, 100, 80], [2, 50, 32], [2, 50, 24], [4, 25, 9], [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12], [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15], [2, 98, 78], [4, 49, 31], [2, 32, 14, 4, 33, 15], [4, 39, 13, 1, 40, 14], [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15], [2, 146, 116], [3, 58, 36, 2, 59, 37], [4, 36, 16, 4, 37, 17], [4, 36, 12, 4, 37, 13], [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16], [4, 101, 81], [1, 80, 50, 4, 81, 51], [4, 50, 22, 4, 51, 23], [3, 36, 12, 8, 37, 13], [2, 116, 92, 2, 117, 93], [6, 58, 36, 2, 59, 37], [4, 46, 20, 6, 47, 21], [7, 42, 14, 4, 43, 15], [4, 133, 107], [8, 59, 37, 1, 60, 38], [8, 44, 20, 4, 45, 21], [12, 33, 11, 4, 34, 12], [3, 145, 115, 1, 146, 116], [4, 64, 40, 5, 65, 41], [11, 36, 16, 5, 37, 17], [11, 36, 12, 5, 37, 13], [5, 109, 87, 1, 110, 88], [5, 65, 41, 5, 66, 42], [5, 54, 24, 7, 55, 25], [11, 36, 12], [5, 122, 98, 1, 123, 99], [7, 73, 45, 3, 74, 46], [15, 43, 19, 2, 44, 20], [3, 45, 15, 13, 46, 16], [1, 135, 107, 5, 136, 108], [10, 74, 46, 1, 75, 47], [1, 50, 22, 15, 51, 23], [2, 42, 14, 17, 43, 15], [5, 150, 120, 1, 151, 121], [9, 69, 43, 4, 70, 44], [17, 50, 22, 1, 51, 23], [2, 42, 14, 19, 43, 15], [3, 141, 113, 4, 142, 114], [3, 70, 44, 11, 71, 45], [17, 47, 21, 4, 48, 22], [9, 39, 13, 16, 40, 14], [3, 135, 107, 5, 136, 108], [3, 67, 41, 13, 68, 42], [15, 54, 24, 5, 55, 25], [15, 43, 15, 10, 44, 16], [4, 144, 116, 4, 145, 117], [17, 68, 42], [17, 50, 22, 6, 51, 23], [19, 46, 16, 6, 47, 17], [2, 139, 111, 7, 140, 112], [17, 74, 46], [7, 54, 24, 16, 55, 25], [34, 37, 13], [4, 151, 121, 5, 152, 122], [4, 75, 47, 14, 76, 48], [11, 54, 24, 14, 55, 25], [16, 45, 15, 14, 46, 16], [6, 147, 117, 4, 148, 118], [6, 73, 45, 14, 74, 46], [11, 54, 24, 16, 55, 25], [30, 46, 16, 2, 47, 17], [8, 132, 106, 4, 133, 107], [8, 75, 47, 13, 76, 48], [7, 54, 24, 22, 55, 25], [22, 45, 15, 13, 46, 16], [10, 142, 114, 2, 143, 115], [19, 74, 46, 4, 75, 47], [28, 50, 22, 6, 51, 23], [33, 46, 16, 4, 47, 17], [8, 152, 122, 4, 153, 123], [22, 73, 45, 3, 74, 46], [8, 53, 23, 26, 54, 24], [12, 45, 15, 28, 46, 16], [3, 147, 117, 10, 148, 118], [3, 73, 45, 23, 74, 46], [4, 54, 24, 31, 55, 25], [11, 45, 15, 31, 46, 16], [7, 146, 116, 7, 147, 117], [21, 73, 45, 7, 74, 46], [1, 53, 23, 37, 54, 24], [19, 45, 15, 26, 46, 16], [5, 145, 115, 10, 146, 116], [19, 75, 47, 10, 76, 48], [15, 54, 24, 25, 55, 25], [23, 45, 15, 25, 46, 16], [13, 145, 115, 3, 146, 116], [2, 74, 46, 29, 75, 47], [42, 54, 24, 1, 55, 25], [23, 45, 15, 28, 46, 16], [17, 145, 115], [10, 74, 46, 23, 75, 47], [10, 54, 24, 35, 55, 25], [19, 45, 15, 35, 46, 16], [17, 145, 115, 1, 146, 116], [14, 74, 46, 21, 75, 47], [29, 54, 24, 19, 55, 25], [11, 45, 15, 46, 46, 16], [13, 145, 115, 6, 146, 116], [14, 74, 46, 23, 75, 47], [44, 54, 24, 7, 55, 25], [59, 46, 16, 1, 47, 17], [12, 151, 121, 7, 152, 122], [12, 75, 47, 26, 76, 48], [39, 54, 24, 14, 55, 25], [22, 45, 15, 41, 46, 16], [6, 151, 121, 14, 152, 122], [6, 75, 47, 34, 76, 48], [46, 54, 24, 10, 55, 25], [2, 45, 15, 64, 46, 16], [17, 152, 122, 4, 153, 123], [29, 74, 46, 14, 75, 47], [49, 54, 24, 10, 55, 25], [24, 45, 15, 46, 46, 16], [4, 152, 122, 18, 153, 123], [13, 74, 46, 32, 75, 47], [48, 54, 24, 14, 55, 25], [42, 45, 15, 32, 46, 16], [20, 147, 117, 4, 148, 118], [40, 75, 47, 7, 76, 48], [43, 54, 24, 22, 55, 25], [10, 45, 15, 67, 46, 16], [19, 148, 118, 6, 149, 119], [18, 75, 47, 31, 76, 48], [34, 54, 24, 34, 55, 25], [20, 45, 15, 61, 46, 16]]; 
+                        if (f = 0, qrCode.isDark(b, e) && f++, qrCode.isDark(b + 1, e) && f++, qrCode.isDark(b, e + 1) && f++, qrCode.isDark(b + 1, e + 1) && f++, 0 == f || 4 == f) d += 3; 
+            for (b = 0; b < col; b++)for (e = 0; e < col - 6; e++)qrCode.isDark(b, e) && !qrCode.isDark(b, e + 1) && qrCode.isDark(b, e + 2) && qrCode.isDark(b, e + 3) && qrCode.isDark(b, e + 4) && !qrCode.isDark(b, e + 5) && qrCode.isDark(b, e + 6) && (d += 40); for (e = 0; e < col; e++)for (b = 0; b < col - 6; b++)qrCode.isDark(b, e) && !qrCode.isDark(b + 1, e) && qrCode.isDark(b + 2, e) && qrCode.isDark(b + 3, e) && qrCode.isDark(b + 4, e) && !qrCode.isDark(b + 5, e) && qrCode.isDark(b + 6, e) && (d += 40); for (e = f = 0; e < col; e++)for (b = 0; b < col; b++)qrCode.isDark(b, e) && f++; qrCode = Math.abs(100 * f / col / col - 50) / 5; 
+            return d + 10 * qrCode 
+        }
+     }, 
+     QRMath = { 
+            glog: function (row) { 
+                if (1 > row) throw Error("glog(" + row + ")"); 
+                return QRMath.LOG_TABLE[row] 
+            }, gexp: function (row) { for (; 0 > row;)row += 255; for (; 256 <= row;)row -= 255; return QRMath.EXP_TABLE[row] }, EXP_TABLE: Array(256), LOG_TABLE: Array(256) }, m = 0; 8 > m; m++)QRMath.EXP_TABLE[m] = 1 << m; for (m = 8; 256 > m; m++)QRMath.EXP_TABLE[m] = QRMath.EXP_TABLE[m - 4] ^ QRMath.EXP_TABLE[m - 5] ^ QRMath.EXP_TABLE[m - 6] ^ QRMath.EXP_TABLE[m - 8]; for (m = 0; 255 > m; m++)QRMath.LOG_TABLE[QRMath.EXP_TABLE[m]] = m; QR8bitByte.prototype = { get: function (row) { return this.num[row] }, getLength: function () { return this.num.length }, multiply: function (row) { for (var col = Array(this.getLength() + row.getLength() - 1), d = 0; d < this.getLength(); d++)for (var b = 0; b < row.getLength(); b++)col[d + b] ^= QRMath.gexp(QRMath.glog(this.get(d)) + QRMath.glog(row.get(b))); return new QR8bitByte(col, 0) }, mod: function (row) { if (0 > this.getLength() - row.getLength()) return this; for (var col = QRMath.glog(this.get(0)) - QRMath.glog(row.get(0)), d = Array(this.getLength()), b = 0; b < this.getLength(); b++)d[b] = this.get(b); for (b = 0; b < row.getLength(); b++)d[b] ^= QRMath.gexp(QRMath.glog(row.get(b)) + col); return (new QR8bitByte(d, 0)).mod(row) } }; p.RS_BLOCK_TABLE = [[1, 26, 19], [1, 26, 16], [1, 26, 13], [1, 26, 9], [1, 44, 34], [1, 44, 28], [1, 44, 22], [1, 44, 16], [1, 70, 55], [1, 70, 44], [2, 35, 17], [2, 35, 13], [1, 100, 80], [2, 50, 32], [2, 50, 24], [4, 25, 9], [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12], [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15], [2, 98, 78], [4, 49, 31], [2, 32, 14, 4, 33, 15], [4, 39, 13, 1, 40, 14], [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15], [2, 146, 116], [3, 58, 36, 2, 59, 37], [4, 36, 16, 4, 37, 17], [4, 36, 12, 4, 37, 13], [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16], [4, 101, 81], [1, 80, 50, 4, 81, 51], [4, 50, 22, 4, 51, 23], [3, 36, 12, 8, 37, 13], [2, 116, 92, 2, 117, 93], [6, 58, 36, 2, 59, 37], [4, 46, 20, 6, 47, 21], [7, 42, 14, 4, 43, 15], [4, 133, 107], [8, 59, 37, 1, 60, 38], [8, 44, 20, 4, 45, 21], [12, 33, 11, 4, 34, 12], [3, 145, 115, 1, 146, 116], [4, 64, 40, 5, 65, 41], [11, 36, 16, 5, 37, 17], [11, 36, 12, 5, 37, 13], [5, 109, 87, 1, 110, 88], [5, 65, 41, 5, 66, 42], [5, 54, 24, 7, 55, 25], [11, 36, 12], [5, 122, 98, 1, 123, 99], [7, 73, 45, 3, 74, 46], [15, 43, 19, 2, 44, 20], [3, 45, 15, 13, 46, 16], [1, 135, 107, 5, 136, 108], [10, 74, 46, 1, 75, 47], [1, 50, 22, 15, 51, 23], [2, 42, 14, 17, 43, 15], [5, 150, 120, 1, 151, 121], [9, 69, 43, 4, 70, 44], [17, 50, 22, 1, 51, 23], [2, 42, 14, 19, 43, 15], [3, 141, 113, 4, 142, 114], [3, 70, 44, 11, 71, 45], [17, 47, 21, 4, 48, 22], [9, 39, 13, 16, 40, 14], [3, 135, 107, 5, 136, 108], [3, 67, 41, 13, 68, 42], [15, 54, 24, 5, 55, 25], [15, 43, 15, 10, 44, 16], [4, 144, 116, 4, 145, 117], [17, 68, 42], [17, 50, 22, 6, 51, 23], [19, 46, 16, 6, 47, 17], [2, 139, 111, 7, 140, 112], [17, 74, 46], [7, 54, 24, 16, 55, 25], [34, 37, 13], [4, 151, 121, 5, 152, 122], [4, 75, 47, 14, 76, 48], [11, 54, 24, 14, 55, 25], [16, 45, 15, 14, 46, 16], [6, 147, 117, 4, 148, 118], [6, 73, 45, 14, 74, 46], [11, 54, 24, 16, 55, 25], [30, 46, 16, 2, 47, 17], [8, 132, 106, 4, 133, 107], [8, 75, 47, 13, 76, 48], [7, 54, 24, 22, 55, 25], [22, 45, 15, 13, 46, 16], [10, 142, 114, 2, 143, 115], [19, 74, 46, 4, 75, 47], [28, 50, 22, 6, 51, 23], [33, 46, 16, 4, 47, 17], [8, 152, 122, 4, 153, 123], [22, 73, 45, 3, 74, 46], [8, 53, 23, 26, 54, 24], [12, 45, 15, 28, 46, 16], [3, 147, 117, 10, 148, 118], [3, 73, 45, 23, 74, 46], [4, 54, 24, 31, 55, 25], [11, 45, 15, 31, 46, 16], [7, 146, 116, 7, 147, 117], [21, 73, 45, 7, 74, 46], [1, 53, 23, 37, 54, 24], [19, 45, 15, 26, 46, 16], [5, 145, 115, 10, 146, 116], [19, 75, 47, 10, 76, 48], [15, 54, 24, 25, 55, 25], [23, 45, 15, 25, 46, 16], [13, 145, 115, 3, 146, 116], [2, 74, 46, 29, 75, 47], [42, 54, 24, 1, 55, 25], [23, 45, 15, 28, 46, 16], [17, 145, 115], [10, 74, 46, 23, 75, 47], [10, 54, 24, 35, 55, 25], [19, 45, 15, 35, 46, 16], [17, 145, 115, 1, 146, 116], [14, 74, 46, 21, 75, 47], [29, 54, 24, 19, 55, 25], [11, 45, 15, 46, 46, 16], [13, 145, 115, 6, 146, 116], [14, 74, 46, 23, 75, 47], [44, 54, 24, 7, 55, 25], [59, 46, 16, 1, 47, 17], [12, 151, 121, 7, 152, 122], [12, 75, 47, 26, 76, 48], [39, 54, 24, 14, 55, 25], [22, 45, 15, 41, 46, 16], [6, 151, 121, 14, 152, 122], [6, 75, 47, 34, 76, 48], [46, 54, 24, 10, 55, 25], [2, 45, 15, 64, 46, 16], [17, 152, 122, 4, 153, 123], [29, 74, 46, 14, 75, 47], [49, 54, 24, 10, 55, 25], [24, 45, 15, 46, 46, 16], [4, 152, 122, 18, 153, 123], [13, 74, 46, 32, 75, 47], [48, 54, 24, 14, 55, 25], [42, 45, 15, 32, 46, 16], [20, 147, 117, 4, 148, 118], [40, 75, 47, 7, 76, 48], [43, 54, 24, 22, 55, 25], [10, 45, 15, 67, 46, 16], [19, 148, 118, 6, 149, 119], [18, 75, 47, 31, 76, 48], [34, 54, 24, 34, 55, 25], [20, 45, 15, 61, 46, 16]]; 
         p.getRSBlocks = function (row, col) { 
             var d = p.getRsBlockTable(row, col); if (void 0 == d) throw Error("bad rs block @ typeNumber:" + row + "/errorCorrectLevel:" + col); 
-        for (var b = d.length / 3, e = [], f = 0; f < b; f++)for (var h = d[3 * f + 0], g = d[3 * f + 1], j = d[3 * f + 2], l = 0; l < h; l++)e.push(new p(g, j)); return e 
+        for (var b = d.length / 3, e = [], f = 0; f < b; f++)for (var h = d[3 * f + 0], g = d[3 * f + 1], j = d[3 * f + 2], QRMath = 0; QRMath < h; QRMath++)e.push(new p(g, j)); return e 
         }; 
         p.getRsBlockTable = function (row, col) { 
             switch (col) { 
