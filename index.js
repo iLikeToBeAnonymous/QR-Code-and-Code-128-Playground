@@ -59,27 +59,22 @@ function processAllInputs() {
         this.dataCache = null; 
         this.dataList = [] 
     } 
-    function QR8bitByteScrewUp(row, col) { 
-        if (void 0 == row.length) throw Error(row.length + "/" + col); 
-        for (var d = 0; d < row.length && 0 == row[d];)d++; 
-        this.num = Array(row.length - d + col); 
-        for (var b = 0; b < row.length - d; b++)this.num[b] = row[b + d] 
-    } 
-    function QRRSBlock(row, col) { this.totalCount = row; this.dataCount = col } 
+
+    function QRRSBlock(totalCount, dataCount) { this.totalCount = totalCount; this.dataCount = dataCount } 
     function t() { this.buffer = []; this.length = 0 } 
     QR8bitByte.prototype = { 
         getLength: function () { return this.data.length }, 
         write: function (row) { for (var col = 0; col < this.data.length; col++)row.put(this.data.charCodeAt(col), 8) } 
     }; 
     QRCodeModel.prototype = { 
-        addData: function (row) { 
-            this.dataList.push(new QR8bitByte(row)); this.dataCache = null 
+        addData: function (data) { 
+            this.dataList.push(new QR8bitByte(data)); this.dataCache = null 
         }, 
         isDark: function (row, col) {
             if (0 > row || this.moduleCount <= row || 0 > col || this.moduleCount <= col) throw Error(row + "," + col); return this.modules[row][col] 
         }, 
         getModuleCount: function() { return this.moduleCount }, 
-        make: function () { 
+        make: function() { 
             if (1 > this.typeNumber) { 
                 for (var row = 1, row = 1; 40 > row; row++) { 
                     for (var col = QRRSBlock.getRSBlocks(row, this.errorCorrectLevel), 
