@@ -47,29 +47,33 @@ function processAllInputs() {
 (function (QRCodeGenerator) { 
     QRCodeGenerator.fn.genQR = function (h) { 
         var s; 
-        function u(row) { 
+        function QR8bitByte(row) { 
             this.mode = s; 
             this.data = row 
         } 
-    function QRCodeModel(row, col) { 
-        this.typeNumber = row; this.errorCorrectLevel = col; 
-        this.modules = null; this.moduleCount = 0; this.dataCache = null; this.dataList = [] 
+    function QRCodeModel(typeNumber, errorCorrectLevel) { 
+        this.typeNumber = typeNumber; 
+        this.errorCorrectLevel = errorCorrectLevel; 
+        this.modules = null; 
+        this.moduleCount = 0; 
+        this.dataCache = null; 
+        this.dataList = [] 
     } 
-    function QR8bitByte(row, col) { 
+    function QR8bitByteScrewUp(row, col) { 
         if (void 0 == row.length) throw Error(row.length + "/" + col); 
         for (var d = 0; d < row.length && 0 == row[d];)d++; 
         this.num = Array(row.length - d + col); 
         for (var b = 0; b < row.length - d; b++)this.num[b] = row[b + d] 
     } 
-    function p(row, col) { this.totalCount = row; this.dataCount = col } 
+    function QRRSBlock(row, col) { this.totalCount = row; this.dataCount = col } 
     function t() { this.buffer = []; this.length = 0 } 
-    u.prototype = { 
+    QR8bitByte.prototype = { 
         getLength: function () { return this.data.length }, 
         write: function (row) { for (var col = 0; col < this.data.length; col++)row.put(this.data.charCodeAt(col), 8) } 
     }; 
     QRCodeModel.prototype = { 
         addData: function (row) { 
-            this.dataList.push(new u(row)); this.dataCache = null 
+            this.dataList.push(new QR8bitByte(row)); this.dataCache = null 
         }, 
         isDark: function (row, col) {
             if (0 > row || this.moduleCount <= row || 0 > col || this.moduleCount <= col) throw Error(row + "," + col); return this.modules[row][col] 
@@ -78,7 +82,7 @@ function processAllInputs() {
         make: function () { 
             if (1 > this.typeNumber) { 
                 for (var row = 1, row = 1; 40 > row; row++) { 
-                    for (var col = p.getRSBlocks(row, this.errorCorrectLevel), 
+                    for (var col = QRRSBlock.getRSBlocks(row, this.errorCorrectLevel), 
                         d = new t, b = 0, e = 0; 
                         e < col.length; e++)b += col[e].dataCount; 
                         for (e = 0; e < this.dataList.length; e++)
@@ -162,31 +166,36 @@ function processAllInputs() {
         } 
     }; 
     QRCodeModel.PAD0 = 236; QRCodeModel.PAD1 = 17; 
-    QRCodeModel.createData = function (row, col, d) { 
-        for (var col = p.getRSBlocks(row, col), b = new t, e = 0; e < d.length; e++) { 
-            var f = d[e]; b.put(f.mode, 4); b.put(f.getLength(), j.getLengthInBits(f.mode, row)); f.write(b) 
+    QRCodeModel.createData = function (typeNumber, errorCorrectLevel, dataList) { 
+        for (var errorCorrectLevel = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel), b = new t, e = 0; e < dataList.length; e++) { 
+            var f = dataList[e]; b.put(f.mode, 4); b.put(f.getLength(), j.getLengthInBits(f.mode, typeNumber)); f.write(b) 
         } 
-        for (e = row = 0; e < col.length; e++)row += col[e].dataCount; 
-            if (b.getLengthInBits() > 8 * row) throw Error("code length overflow. (" + b.getLengthInBits() + ">" + 8 * row + ")"); 
-            for (b.getLengthInBits() + 4 <= 8 * row && b.put(0, 4); 
+        for (e = typeNumber = 0; e < errorCorrectLevel.length; e++) typeNumber += errorCorrectLevel[e].dataCount; 
+            if (b.getLengthInBits() > 8 * typeNumber) throw Error("code length overflow. (" + b.getLengthInBits() + ">" + 8 * typeNumber + ")"); 
+            for (b.getLengthInBits() + 4 <= 8 * typeNumber && b.put(0, 4); 
             0 != b.getLengthInBits() % 8;)b.putBit(!1); 
-            for (; !(b.getLengthInBits() >= 8 * row);) { b.put(QRCodeModel.PAD0, 8); if (b.getLengthInBits() >= 8 * row) break; b.put(QRCodeModel.PAD1, 8) } return QRCodeModel.createBytes(b, col) 
+            for (; !(b.getLengthInBits() >= 8 * typeNumber);) { 
+                b.put(QRCodeModel.PAD0, 8); 
+                if (b.getLengthInBits() >= 8 * typeNumber) break; 
+                b.put(QRCodeModel.PAD1, 8) 
+            } return QRCodeModel.createBytes(b, errorCorrectLevel) 
     }; 
-    QRCodeModel.createBytes = function (row, col) { 
-        for (var d = 0, b = 0, e = 0, f = Array(col.length), i = Array(col.length), g = 0; g < col.length; g++) { 
-                var n = col[g].dataCount, h = col[g].totalCount - n, b = Math.max(b, n), e = Math.max(e, h); 
-                f[g] = Array(n); 
-                for (var k = 0; k < f[g].length; k++)f[g][k] = 255 & row.buffer[k + d]; d += n; k = j.getErrorCorrectPolynomial(h); 
-                n = (new QR8bitByte(f[g], k.getLength() - 1)).mod(k); i[g] = Array(k.getLength() - 1); 
-                for (k = 0; k < i[g].length; k++)h = k + n.getLength() - i[g].length, i[g][k] = 0 <= h ? n.get(h) : 0 
+    QRCodeModel.createBytes = function (buffer, rsBlocks) { 
+        for (var offset = 0, maxDcCount = 0, maxEcCount = 0, dcdata = Array(rsBlocks.length), ecdata = Array(rsBlocks.length), r = 0; r < rsBlocks.length; r++) { 
+                var dcCount = rsBlocks[r].dataCount, ecCount = rsBlocks[r].totalCount - dcCount, maxDcCount = Math.max(maxDcCount, dcCount), maxEcCount = Math.max(maxEcCount, ecCount); 
+                dcdata[r] = Array(dcCount); 
+                for (var i = 0; i < dcdata[r].length; i++) dcdata[r][i] = 255 & buffer.buffer[i + offset]; 
+                offset += dcCount; i = j.getErrorCorrectPolynomial(ecCount); 
+                dcCount = (new QRPolynomial(dcdata[r], i.getLength() - 1)).mod(i); ecdata[r] = Array(i.getLength() - 1); 
+                for (i = 0; i < ecdata[r].length; i++)ecCount = i + dcCount.getLength() - ecdata[r].length, ecdata[r][i] = 0 <= ecCount ? dcCount.get(ecCount) : 0 
         } 
-        for (k = g = 0; k < col.length; k++)
-            g += col[k].totalCount; d = Array(g); 
-            for (k = n = 0; k < b; k++)
-                for (g = 0; g < col.length; g++)
-                    k < f[g].length && (d[n++] = f[g][k]); 
-                    for (k = 0; k < e; k++)for (g = 0; g < col.length; g++)k < i[g].length && (d[n++] = i[g][k]); 
-                    return d 
+        for (i = r = 0; i < rsBlocks.length; i++)
+            r += rsBlocks[i].totalCount; offset = Array(r); 
+            for (i = dcCount = 0; i < maxDcCount; i++)
+                for (r = 0; r < rsBlocks.length; r++)
+                    i < dcdata[r].length && (offset[dcCount++] = dcdata[r][i]); 
+                    for (i = 0; i < maxEcCount; i++)for (r = 0; r < rsBlocks.length; r++)i < ecdata[r].length && (offset[dcCount++] = ecdata[r][i]); 
+                    return offset 
     }; 
     s = 4; for (var j = { 
         PATTERN_POSITION_TABLE: [
@@ -217,9 +226,9 @@ function processAllInputs() {
                 default: throw Error("bad maskPattern:" + row); 
             } 
         }, 
-        getErrorCorrectPolynomial: function (row) { 
-            for (var col = new QR8bitByte([1], 0), d = 0; d < row; d++)
-                col = col.multiply(new QR8bitByte([1, QRMath.gexp(d)], 0)); return col 
+        getErrorCorrectPolynomial: function (errorCorrectLength) { 
+            for (var a = new QRPolynomial([1], 0), d = 0; d < errorCorrectLength; d++)
+                a = a.multiply(new QRPolynomial([1, QRMath.gexp(d)], 0)); return a 
         }, 
         getLengthInBits: function (row, col) { 
             if (1 <= col && 10 > col) switch (row) { 
@@ -252,19 +261,51 @@ function processAllInputs() {
             return d + 10 * qrCode 
         }
      }, 
-     QRMath = { 
-            glog: function (row) { 
-                if (1 > row) throw Error("glog(" + row + ")"); 
-                return QRMath.LOG_TABLE[row] 
-            }, gexp: function (row) { for (; 0 > row;)row += 255; for (; 256 <= row;)row -= 255; return QRMath.EXP_TABLE[row] }, EXP_TABLE: Array(256), LOG_TABLE: Array(256) }, m = 0; 8 > m; m++)QRMath.EXP_TABLE[m] = 1 << m; for (m = 8; 256 > m; m++)QRMath.EXP_TABLE[m] = QRMath.EXP_TABLE[m - 4] ^ QRMath.EXP_TABLE[m - 5] ^ QRMath.EXP_TABLE[m - 6] ^ QRMath.EXP_TABLE[m - 8]; for (m = 0; 255 > m; m++)QRMath.LOG_TABLE[QRMath.EXP_TABLE[m]] = m; QR8bitByte.prototype = { get: function (row) { return this.num[row] }, getLength: function () { return this.num.length }, multiply: function (row) { for (var col = Array(this.getLength() + row.getLength() - 1), d = 0; d < this.getLength(); d++)for (var b = 0; b < row.getLength(); b++)col[d + b] ^= QRMath.gexp(QRMath.glog(this.get(d)) + QRMath.glog(row.get(b))); return new QR8bitByte(col, 0) }, mod: function (row) { if (0 > this.getLength() - row.getLength()) return this; for (var col = QRMath.glog(this.get(0)) - QRMath.glog(row.get(0)), d = Array(this.getLength()), b = 0; b < this.getLength(); b++)d[b] = this.get(b); for (b = 0; b < row.getLength(); b++)d[b] ^= QRMath.gexp(QRMath.glog(row.get(b)) + col); return (new QR8bitByte(d, 0)).mod(row) } }; p.RS_BLOCK_TABLE = [[1, 26, 19], [1, 26, 16], [1, 26, 13], [1, 26, 9], [1, 44, 34], [1, 44, 28], [1, 44, 22], [1, 44, 16], [1, 70, 55], [1, 70, 44], [2, 35, 17], [2, 35, 13], [1, 100, 80], [2, 50, 32], [2, 50, 24], [4, 25, 9], [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12], [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15], [2, 98, 78], [4, 49, 31], [2, 32, 14, 4, 33, 15], [4, 39, 13, 1, 40, 14], [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15], [2, 146, 116], [3, 58, 36, 2, 59, 37], [4, 36, 16, 4, 37, 17], [4, 36, 12, 4, 37, 13], [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16], [4, 101, 81], [1, 80, 50, 4, 81, 51], [4, 50, 22, 4, 51, 23], [3, 36, 12, 8, 37, 13], [2, 116, 92, 2, 117, 93], [6, 58, 36, 2, 59, 37], [4, 46, 20, 6, 47, 21], [7, 42, 14, 4, 43, 15], [4, 133, 107], [8, 59, 37, 1, 60, 38], [8, 44, 20, 4, 45, 21], [12, 33, 11, 4, 34, 12], [3, 145, 115, 1, 146, 116], [4, 64, 40, 5, 65, 41], [11, 36, 16, 5, 37, 17], [11, 36, 12, 5, 37, 13], [5, 109, 87, 1, 110, 88], [5, 65, 41, 5, 66, 42], [5, 54, 24, 7, 55, 25], [11, 36, 12], [5, 122, 98, 1, 123, 99], [7, 73, 45, 3, 74, 46], [15, 43, 19, 2, 44, 20], [3, 45, 15, 13, 46, 16], [1, 135, 107, 5, 136, 108], [10, 74, 46, 1, 75, 47], [1, 50, 22, 15, 51, 23], [2, 42, 14, 17, 43, 15], [5, 150, 120, 1, 151, 121], [9, 69, 43, 4, 70, 44], [17, 50, 22, 1, 51, 23], [2, 42, 14, 19, 43, 15], [3, 141, 113, 4, 142, 114], [3, 70, 44, 11, 71, 45], [17, 47, 21, 4, 48, 22], [9, 39, 13, 16, 40, 14], [3, 135, 107, 5, 136, 108], [3, 67, 41, 13, 68, 42], [15, 54, 24, 5, 55, 25], [15, 43, 15, 10, 44, 16], [4, 144, 116, 4, 145, 117], [17, 68, 42], [17, 50, 22, 6, 51, 23], [19, 46, 16, 6, 47, 17], [2, 139, 111, 7, 140, 112], [17, 74, 46], [7, 54, 24, 16, 55, 25], [34, 37, 13], [4, 151, 121, 5, 152, 122], [4, 75, 47, 14, 76, 48], [11, 54, 24, 14, 55, 25], [16, 45, 15, 14, 46, 16], [6, 147, 117, 4, 148, 118], [6, 73, 45, 14, 74, 46], [11, 54, 24, 16, 55, 25], [30, 46, 16, 2, 47, 17], [8, 132, 106, 4, 133, 107], [8, 75, 47, 13, 76, 48], [7, 54, 24, 22, 55, 25], [22, 45, 15, 13, 46, 16], [10, 142, 114, 2, 143, 115], [19, 74, 46, 4, 75, 47], [28, 50, 22, 6, 51, 23], [33, 46, 16, 4, 47, 17], [8, 152, 122, 4, 153, 123], [22, 73, 45, 3, 74, 46], [8, 53, 23, 26, 54, 24], [12, 45, 15, 28, 46, 16], [3, 147, 117, 10, 148, 118], [3, 73, 45, 23, 74, 46], [4, 54, 24, 31, 55, 25], [11, 45, 15, 31, 46, 16], [7, 146, 116, 7, 147, 117], [21, 73, 45, 7, 74, 46], [1, 53, 23, 37, 54, 24], [19, 45, 15, 26, 46, 16], [5, 145, 115, 10, 146, 116], [19, 75, 47, 10, 76, 48], [15, 54, 24, 25, 55, 25], [23, 45, 15, 25, 46, 16], [13, 145, 115, 3, 146, 116], [2, 74, 46, 29, 75, 47], [42, 54, 24, 1, 55, 25], [23, 45, 15, 28, 46, 16], [17, 145, 115], [10, 74, 46, 23, 75, 47], [10, 54, 24, 35, 55, 25], [19, 45, 15, 35, 46, 16], [17, 145, 115, 1, 146, 116], [14, 74, 46, 21, 75, 47], [29, 54, 24, 19, 55, 25], [11, 45, 15, 46, 46, 16], [13, 145, 115, 6, 146, 116], [14, 74, 46, 23, 75, 47], [44, 54, 24, 7, 55, 25], [59, 46, 16, 1, 47, 17], [12, 151, 121, 7, 152, 122], [12, 75, 47, 26, 76, 48], [39, 54, 24, 14, 55, 25], [22, 45, 15, 41, 46, 16], [6, 151, 121, 14, 152, 122], [6, 75, 47, 34, 76, 48], [46, 54, 24, 10, 55, 25], [2, 45, 15, 64, 46, 16], [17, 152, 122, 4, 153, 123], [29, 74, 46, 14, 75, 47], [49, 54, 24, 10, 55, 25], [24, 45, 15, 46, 46, 16], [4, 152, 122, 18, 153, 123], [13, 74, 46, 32, 75, 47], [48, 54, 24, 14, 55, 25], [42, 45, 15, 32, 46, 16], [20, 147, 117, 4, 148, 118], [40, 75, 47, 7, 76, 48], [43, 54, 24, 22, 55, 25], [10, 45, 15, 67, 46, 16], [19, 148, 118, 6, 149, 119], [18, 75, 47, 31, 76, 48], [34, 54, 24, 34, 55, 25], [20, 45, 15, 61, 46, 16]]; 
-        p.getRSBlocks = function (row, col) { 
-            var d = p.getRsBlockTable(row, col); if (void 0 == d) throw Error("bad rs block @ typeNumber:" + row + "/errorCorrectLevel:" + col); 
-        for (var b = d.length / 3, e = [], f = 0; f < b; f++)for (var h = d[3 * f + 0], g = d[3 * f + 1], j = d[3 * f + 2], QRMath = 0; QRMath < h; QRMath++)e.push(new p(g, j)); return e 
+     QRMath = {glog: function (n) { 
+                if (1 > n) throw Error("glog(" + n + ")"); 
+                return QRMath.LOG_TABLE[n] 
+            }, 
+            gexp: function (n) { 
+                for (; 0 > n;) n += 255; 
+                for (; 256 <= n;) n -= 255; 
+                return QRMath.EXP_TABLE[n] 
+            }, 
+            EXP_TABLE: Array(256), LOG_TABLE: Array(256) 
+    }, 
+    m = 0; 8 > m; m++) QRMath.EXP_TABLE[m] = 1 << m; 
+    for (m = 8; 256 > m; m++) QRMath.EXP_TABLE[m] = QRMath.EXP_TABLE[m - 4] ^ QRMath.EXP_TABLE[m - 5] ^ QRMath.EXP_TABLE[m - 6] ^ QRMath.EXP_TABLE[m - 8]; 
+    for (m = 0; 255 > m; m++)QRMath.LOG_TABLE[QRMath.EXP_TABLE[m]] = m; 
+    function QRPolynomial(num,shift){
+		if(num.length==undefined){throw new Error(num.length+"/"+shift);}
+    	var offset=0;while(offset<num.length&&num[offset]==0){offset++;}
+    	this.num=new Array(num.length-offset+shift);for(var i=0;i<num.length-offset;i++){this.num[i]=num[i+offset];}
+	}
+    QRPolynomial.prototype = { 
+        get: function (index) { 
+            return this.num[index] 
+        }, 
+        getLength: function () { 
+            return this.num.length 
+        }, 
+        multiply: function (index) { 
+            for (var col = Array(this.getLength() + index.getLength() - 1), d = 0; d < this.getLength(); d++)
+            for (var b = 0; b < index.getLength(); b++)col[d + b] ^= QRMath.gexp(QRMath.glog(this.get(d)) + QRMath.glog(index.get(b))); 
+            return new QRPolynomial(col, 0) }, 
+        mod: function (index) { 
+            if (0 > this.getLength() - index.getLength()) return this; 
+            for (var col = QRMath.glog(this.get(0)) - QRMath.glog(index.get(0)), d = Array(this.getLength()), b = 0; 
+            b < this.getLength(); b++)d[b] = this.get(b); for (b = 0; b < index.getLength(); b++) d[b] ^= QRMath.gexp(QRMath.glog(index.get(b)) + col); 
+            return (new QRPolynomial(d, 0)).mod(index) } 
         }; 
-        p.getRsBlockTable = function (row, col) { 
+        QRRSBlock.RS_BLOCK_TABLE = [[1, 26, 19], [1, 26, 16], [1, 26, 13], [1, 26, 9], [1, 44, 34], [1, 44, 28], [1, 44, 22], [1, 44, 16], [1, 70, 55], [1, 70, 44], [2, 35, 17], [2, 35, 13], [1, 100, 80], [2, 50, 32], [2, 50, 24], [4, 25, 9], [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12], [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15], [2, 98, 78], [4, 49, 31], [2, 32, 14, 4, 33, 15], [4, 39, 13, 1, 40, 14], [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15], [2, 146, 116], [3, 58, 36, 2, 59, 37], [4, 36, 16, 4, 37, 17], [4, 36, 12, 4, 37, 13], [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16], [4, 101, 81], [1, 80, 50, 4, 81, 51], [4, 50, 22, 4, 51, 23], [3, 36, 12, 8, 37, 13], [2, 116, 92, 2, 117, 93], [6, 58, 36, 2, 59, 37], [4, 46, 20, 6, 47, 21], [7, 42, 14, 4, 43, 15], [4, 133, 107], [8, 59, 37, 1, 60, 38], [8, 44, 20, 4, 45, 21], [12, 33, 11, 4, 34, 12], [3, 145, 115, 1, 146, 116], [4, 64, 40, 5, 65, 41], [11, 36, 16, 5, 37, 17], [11, 36, 12, 5, 37, 13], [5, 109, 87, 1, 110, 88], [5, 65, 41, 5, 66, 42], [5, 54, 24, 7, 55, 25], [11, 36, 12], [5, 122, 98, 1, 123, 99], [7, 73, 45, 3, 74, 46], [15, 43, 19, 2, 44, 20], [3, 45, 15, 13, 46, 16], [1, 135, 107, 5, 136, 108], [10, 74, 46, 1, 75, 47], [1, 50, 22, 15, 51, 23], [2, 42, 14, 17, 43, 15], [5, 150, 120, 1, 151, 121], [9, 69, 43, 4, 70, 44], [17, 50, 22, 1, 51, 23], [2, 42, 14, 19, 43, 15], [3, 141, 113, 4, 142, 114], [3, 70, 44, 11, 71, 45], [17, 47, 21, 4, 48, 22], [9, 39, 13, 16, 40, 14], [3, 135, 107, 5, 136, 108], [3, 67, 41, 13, 68, 42], [15, 54, 24, 5, 55, 25], [15, 43, 15, 10, 44, 16], [4, 144, 116, 4, 145, 117], [17, 68, 42], [17, 50, 22, 6, 51, 23], [19, 46, 16, 6, 47, 17], [2, 139, 111, 7, 140, 112], [17, 74, 46], [7, 54, 24, 16, 55, 25], [34, 37, 13], [4, 151, 121, 5, 152, 122], [4, 75, 47, 14, 76, 48], [11, 54, 24, 14, 55, 25], [16, 45, 15, 14, 46, 16], [6, 147, 117, 4, 148, 118], [6, 73, 45, 14, 74, 46], [11, 54, 24, 16, 55, 25], [30, 46, 16, 2, 47, 17], [8, 132, 106, 4, 133, 107], [8, 75, 47, 13, 76, 48], [7, 54, 24, 22, 55, 25], [22, 45, 15, 13, 46, 16], [10, 142, 114, 2, 143, 115], [19, 74, 46, 4, 75, 47], [28, 50, 22, 6, 51, 23], [33, 46, 16, 4, 47, 17], [8, 152, 122, 4, 153, 123], [22, 73, 45, 3, 74, 46], [8, 53, 23, 26, 54, 24], [12, 45, 15, 28, 46, 16], [3, 147, 117, 10, 148, 118], [3, 73, 45, 23, 74, 46], [4, 54, 24, 31, 55, 25], [11, 45, 15, 31, 46, 16], [7, 146, 116, 7, 147, 117], [21, 73, 45, 7, 74, 46], [1, 53, 23, 37, 54, 24], [19, 45, 15, 26, 46, 16], [5, 145, 115, 10, 146, 116], [19, 75, 47, 10, 76, 48], [15, 54, 24, 25, 55, 25], [23, 45, 15, 25, 46, 16], [13, 145, 115, 3, 146, 116], [2, 74, 46, 29, 75, 47], [42, 54, 24, 1, 55, 25], [23, 45, 15, 28, 46, 16], [17, 145, 115], [10, 74, 46, 23, 75, 47], [10, 54, 24, 35, 55, 25], [19, 45, 15, 35, 46, 16], [17, 145, 115, 1, 146, 116], [14, 74, 46, 21, 75, 47], [29, 54, 24, 19, 55, 25], [11, 45, 15, 46, 46, 16], [13, 145, 115, 6, 146, 116], [14, 74, 46, 23, 75, 47], [44, 54, 24, 7, 55, 25], [59, 46, 16, 1, 47, 17], [12, 151, 121, 7, 152, 122], [12, 75, 47, 26, 76, 48], [39, 54, 24, 14, 55, 25], [22, 45, 15, 41, 46, 16], [6, 151, 121, 14, 152, 122], [6, 75, 47, 34, 76, 48], [46, 54, 24, 10, 55, 25], [2, 45, 15, 64, 46, 16], [17, 152, 122, 4, 153, 123], [29, 74, 46, 14, 75, 47], [49, 54, 24, 10, 55, 25], [24, 45, 15, 46, 46, 16], [4, 152, 122, 18, 153, 123], [13, 74, 46, 32, 75, 47], [48, 54, 24, 14, 55, 25], [42, 45, 15, 32, 46, 16], [20, 147, 117, 4, 148, 118], [40, 75, 47, 7, 76, 48], [43, 54, 24, 22, 55, 25], [10, 45, 15, 67, 46, 16], [19, 148, 118, 6, 149, 119], [18, 75, 47, 31, 76, 48], [34, 54, 24, 34, 55, 25], [20, 45, 15, 61, 46, 16]]; 
+        QRRSBlock.getRSBlocks = function (row, col) { 
+            var d = QRRSBlock.getRsBlockTable(row, col); if (void 0 == d) throw Error("bad rs block @ typeNumber:" + row + "/errorCorrectLevel:" + col); 
+        for (var b = d.length / 3, e = [], f = 0; f < b; f++)for (var h = d[3 * f + 0], g = d[3 * f + 1], j = d[3 * f + 2], QRMath = 0; QRMath < h; QRMath++)e.push(new QRRSBlock(g, j)); return e 
+        }; 
+        QRRSBlock.getRsBlockTable = function (row, col) { 
             switch (col) { 
-                case 1: return p.RS_BLOCK_TABLE[4 * (row - 1) + 0]; case 0: return p.RS_BLOCK_TABLE[4 * (row - 1) + 1]; 
-                case 3: return p.RS_BLOCK_TABLE[4 * (row - 1) + 2]; case 2: return p.RS_BLOCK_TABLE[4 * (row - 1) + 3] 
+                case 1: return QRRSBlock.RS_BLOCK_TABLE[4 * (row - 1) + 0]; case 0: return QRRSBlock.RS_BLOCK_TABLE[4 * (row - 1) + 1]; 
+                case 3: return QRRSBlock.RS_BLOCK_TABLE[4 * (row - 1) + 2]; case 2: return QRRSBlock.RS_BLOCK_TABLE[4 * (row - 1) + 3] 
             } 
         }; 
         t.prototype = { 
