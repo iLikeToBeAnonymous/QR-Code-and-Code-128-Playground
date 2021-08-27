@@ -40,7 +40,7 @@
       </div>
 
       <!-- QR CODE COLUMN -->
-      <div class="col-sm shadow p-2 mb-2 text-center">
+      <div class="col-sm-1 shadow p-2 mb-2 text-center">
         <div id="qrLandingZone" class="d-inline-flex"></div>
       </div>
 
@@ -53,34 +53,45 @@
   <script>"https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"</script>
   <script>"https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.min.js"</script>
   <script>
-    "use strict"; // See "Why Strict Mode?" at https://www.w3schools.com/js/js_strict.asp
+    // "use strict"; // See "Why Strict Mode?" at https://www.w3schools.com/js/js_strict.asp
 
-    //Listen for input events on the input box
-    document.querySelector('#transactionRef').addEventListener('input',(event) => {genQR(event.target.value)})
+    // //Listen for input events on the input box
+    // document.querySelector('#transactionRef').addEventListener('input',(event) => {genQR(event.target.value)})
 
-    var transactionRefQr //declared outside the document ready section. 
+    // var transactionRefQr //declared outside the document ready section. 
 
-    //Using the params defined above, instanciate a new QRCode in the target element
-    //var transactionRefQr = new QRCode(document.getElementById('qrLandingZone'), qrParams);
-    $(document).ready( ()=>{
-    //Define size and error checking of qr code
-    var qrParams = {
-      width: 100, height: 100, 
-      colorDark: '#000000',
-      colorLight: '#ffffff', 
-      correctionLevel: QRCode.correctionLevel.H, //approximately 30% restoration, the highest level.
-      useSvg: true //Doesn't work?
-    }; 
-    transactionRefQr = new QRCode(document.getElementById('qrLandingZone'), qrParams);
-    //So a QR gets generated at runtime
-    genQR($('#transactionRef').val()); 
-    });
+    // $(document).ready( ()=>{
+    // //Define size and error checking of qr code
+    // var qrParams = {
+    //   width: 100, height: 100, 
+    //   color: '#000000',
+    //   background: '#ffffff', 
+    //   ecl: "H", //approximately 30% restoration, the highest level.
+    //   container: "svg-viewbox", //Responsive use
+    //   join: true
+    // }; 
+
+    // transactionRefQr = new QRCode(qrParams);
+    // //So a QR gets generated at runtime
+    // genQR($('#transactionRef').val()); 
+    // });
 
 
-    function genQR(textVal){
-      transactionRefQr.clear(); //in case there's already something there
-      transactionRefQr.makeCode(textVal);
-    };
+    // function genQR(textVal){
+    //   transactionRefQr.content = 'textVal';
+    //   document.getElementById('transactionRef').innerHTML = transactionRefQr.svg();
+    // };
+    var transactionRefQr = new QRCode({
+            content: $('#transactionRef').val(),
+            width: 50, height: 50, 
+            color: '#000000',
+            background: '#ffffff', 
+            ecl: "H", //approximately 30% restoration, the highest level.
+            container: "svg-viewbox", //Responsive use
+            join: true
+        });
+    var svg = transactionRefQr.svg();
+    document.getElementById("qrLandingZone").innerHTML = svg;
   </script>
 </footer>
 
