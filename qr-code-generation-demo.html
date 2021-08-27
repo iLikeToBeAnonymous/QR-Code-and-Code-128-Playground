@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <title>QR code demo</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script type="text/javascript" src="qr-code-generator.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+</head>
+<body>
+  <!-- Parent div for the page -->
+  <div class="container-fluid p-2">
+    <!-- NOTES ROW-->  
+    <div class="row container-fluid">
+      <div class="shadow p-2 mb-2">
+        <h3>Important Notes:</h3>
+        <p>
+          Because the QR code script relies heavily on a variety of classes, it is important that the 
+          script be declared before any code that uses it. <br> Therefore, if the QR code script is 
+          in-lined in the HTML doc, it should be done before the rest of the document. If instead it 
+          is placed in a CDN, it should be declared in the head of the document, just like the 
+          declaration of the src for jQuery (as shown in this document).
+        </p>
+        <p>
+            Alternatively, if the instanciation of the QR code is nested within a jQuery 
+            <code>.ready()</code> function, this issue is bypassed and it allows for cleaner code.
+        </p>
+      </div>
+    </div>
+
+    <!-- DEMO ROW OF INPUT FOLLOWED BY THE RESULTING QR -->
+    <div class="row container-fluid">
+      
+      <!-- INPUT BOX COLUMN -->
+      <div class="col-sm shadow p-2 mb-2">
+        <input id="transactionRef" type="text" class="form-control" value="PO-12345" placeholder="%%ATT:TransactionRef%%" />
+      </div>
+
+      <!-- QR CODE COLUMN -->
+      <div class="col-sm shadow p-2 mb-2 text-center">
+        <div id="qrLandingZone" class="d-inline-flex"></div>
+      </div>
+
+    </div>
+  </div> <!-- end parent div -->
+ 
+</body>
+
+<footer>
+  <script>"https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"</script>
+  <script>"https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.min.js"</script>
+  <script>
+    "use strict"; // See "Why Strict Mode?" at https://www.w3schools.com/js/js_strict.asp
+
+    //Listen for input events on the input box
+    document.querySelector('#transactionRef').addEventListener('input',(event) => {genQR(event.target.value)})
+
+    var transactionRefQr //declared outside the document ready section. 
+
+    //Using the params defined above, instanciate a new QRCode in the target element
+    //var transactionRefQr = new QRCode(document.getElementById('qrLandingZone'), qrParams);
+    $(document).ready( ()=>{
+    //Define size and error checking of qr code
+    var qrParams = {
+      width: 100, height: 100, 
+      colorDark: '#000000',
+      colorLight: '#ffffff', 
+      correctionLevel: QRCode.correctionLevel.H, //approximately 30% restoration, the highest level.
+      useSvg: true //Doesn't work?
+    }; 
+    transactionRefQr = new QRCode(document.getElementById('qrLandingZone'), qrParams);
+    //So a QR gets generated at runtime
+    genQR($('#transactionRef').val()); 
+    });
+
+
+    function genQR(textVal){
+      transactionRefQr.clear(); //in case there's already something there
+      transactionRefQr.makeCode(textVal);
+    };
+  </script>
+</footer>
+
+</html>
