@@ -58,35 +58,50 @@
     //Listen for input events on the input box
     document.querySelector('#transactionRef').addEventListener('input',(event) => {genQR(event.target.value)})
 
-    var transactionRefQr, qrParams, trRefSvg //declared outside the document ready section. 
+    var transactionRefQR, qrParams, trRefSvg //declared outside the document ready section. 
 
     $(document).ready( ()=>{
     // //Define size and error checking of qr code
     qrParams = {
       content: $('#transactionRef').val(),
-      width: 100, height: 100, 
+      width: 100, height: 100, //these params need to be put on the viewBox like: viewBox="0 0 100px 100px"
       color: '#000000',
       background: '#ffffff', 
-      ecl: "H", //approximately 30% restoration, the highest level.
-      container: "svg-viewbox", //Responsive use
-      join: true
+      ecl: 'H', //approximately 30% restoration, the highest level.
+      //for the "container" param, val of "svg" will be according to the width and height params, but 
+      //"svg-viewbox" is responsive and will dynamically resize to the container regardless of the width and height params.
+      container: 'svg', 
+      join: true,
+      force: true
     }; 
 
-    // transactionRefQr = new QRCode(qrParams);
+    // transactionRefQR = new QRCode(qrParams);
     // //So a QR gets generated at runtime
-    // genQR($('#transactionRef').val()); 
-      transactionRefQr = new QRCode(qrParams)
-      trRefSvg = transactionRefQr.svg();
-      document.getElementById("qrLandingZone").innerHTML = trRefSvg;
+      transactionRefQR = new QRCode(qrParams)
+      trRefSvg = transactionRefQR.svg();
+      //document.getElementById("qrLandingZone").innerHTML = trRefSvg;
+      $('#qrLandingZone').html(trRefSvg);
     });
 
 
     function genQR(textVal){
-      //console.log(textVal);
-      qrParams.content = $('#transactionRef').val()
-      document.getElementById("qrLandingZone").clear
-      transactionRefQr = new QRCode(qrParams)
-      document.getElementById("qrLandingZone").innerHTML = transactionRefQr.svg();
+      //Update the qrParams object with the new content value.
+      qrParams.content = textVal
+
+      //The parameters of the QRCode object can be updated individually.
+      //transactionRefQR.options.content = textVal
+      //console.log(transactionRefQR.options)
+      //console.log(`transactionRefQR's constructor is: ${transactionRefQR.constructor}`)
+      //console.log(`transactionRefQR's descriptors are: ${Object.getOwnPropertyDescriptors(transactionRefQR)}`)
+      //console.log(`transactionRefQR's Propertydescriptors are: ${Object.getOwnPropertyDescriptors(transactionRefQR,'modules').set}`)
+
+      //Clear the inner html of the qrLandingZone div.
+      $('#qrLandingZone').empty()
+
+      //generate a new QRCode object
+      transactionRefQR = new QRCode(qrParams)
+      //...and from it generate a new svg and display it in the qrLandingZone div.
+      $('#qrLandingZone').html(transactionRefQR.svg());
     };
   </script>
 </footer>
