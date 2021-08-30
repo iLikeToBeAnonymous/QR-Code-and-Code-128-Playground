@@ -58,8 +58,10 @@
     //Listen for input events on the input box
     document.querySelector('#transactionRef').addEventListener('input',(event) => {genQR(event.target.value)})
 
-    var transactionRefQR, qrParams, trRefSvg //declared outside the document ready section. 
+    //declared outside the document ready section so no runtime errors are thrown.
+    var transactionRefQR, qrParams, trRefSvg
 
+    //QR specific functions don't run until the page is ready in case the QR js is loaded last.
     $(document).ready( ()=>{
     // //Define size and error checking of qr code
     qrParams = {
@@ -75,12 +77,8 @@
       force: true
     }; 
 
-    // transactionRefQR = new QRCode(qrParams);
-    // //So a QR gets generated at runtime
-      transactionRefQR = new QRCode(qrParams)
-      trRefSvg = transactionRefQR.svg();
-      //document.getElementById("qrLandingZone").innerHTML = trRefSvg;
-      $('#qrLandingZone').html(trRefSvg);
+      //So a QR gets generated at runtime
+      genQR($('#transactionRef').val())
     });
 
 
@@ -88,18 +86,19 @@
       //Update the qrParams object with the new content value.
       qrParams.content = textVal
 
-      //The parameters of the QRCode object can be updated individually.
-      //transactionRefQR.options.content = textVal
-      //console.log(transactionRefQR.options)
-      //console.log(`transactionRefQR's constructor is: ${transactionRefQR.constructor}`)
-      //console.log(`transactionRefQR's descriptors are: ${Object.getOwnPropertyDescriptors(transactionRefQR)}`)
-      //console.log(`transactionRefQR's Propertydescriptors are: ${Object.getOwnPropertyDescriptors(transactionRefQR,'modules').set}`)
-
-      //Clear the inner html of the qrLandingZone div.
-      $('#qrLandingZone').empty()
-
-      //generate a new QRCode object
-      transactionRefQR = new QRCode(qrParams)
+      //if(typeof transactionRefQR != 'undefined'){
+        //The parameters of the QRCode object can be updated individually.
+        //transactionRefQR.options.content = textVal
+        //console.log(transactionRefQR.options)
+        //console.log(`transactionRefQR's constructor is: ${transactionRefQR.constructor}`)
+        //console.log(`transactionRefQR's descriptors are: ${Object.getOwnPropertyDescriptors(transactionRefQR)}`)
+        //console.log(`transactionRefQR's Propertydescriptors are: ${Object.getOwnPropertyDescriptors(transactionRefQR,'modules').set}`)
+        //console.log(`transactionRefQR's Propertydescriptors are: ${Object.getOwnPropertyDescriptors(transactionRefQR,'modules').options}`)
+      //}
+      console.log(`The QR object is of type: ${typeof(transactionRefQR)}`)
+      $('#qrLandingZone').empty() //Clear the inner html of the qrLandingZone div.
+      transactionRefQR = null //set it as null for safety
+      transactionRefQR = new QRCode(qrParams) //generate a new QRCode object
       //...and from it generate a new svg and display it in the qrLandingZone div.
       $('#qrLandingZone').html(transactionRefQR.svg());
     };
