@@ -11,11 +11,13 @@
 
 </head>
 <body>
-  <!-- Parent div for the page -->
-  <div class="container-fluid p-2">
+  <!-- Parent div container for the page -->
+  <!-- You can read more about the grid system I used here:
+        https://getbootstrap.com/docs/4.0/layout/grid/ -->
+  <div class="container-fluid m-2 p-2">
     <!-- NOTES ROW-->  
-    <div class="row container-fluid">
-      <div class="shadow p-2 mb-2">
+    <div class="row m-2 p-2">
+      <div class="col-lg shadow p-2 m-2">
         <h3>Important Notes:</h3>
         <p>
           Because the QR code script relies heavily on a variety of classes, it is important that the 
@@ -32,20 +34,20 @@
     </div>
 
     <!-- DEMO ROW OF INPUT FOLLOWED BY THE RESULTING QR -->
-    <div class="row container-fluid">
+    <div class="row m-2 p-2">
       
       <!-- INPUT BOX COLUMN -->
-      <div class="col-sm shadow p-2 mb-2">
-        <input id="transactionRef" type="text" class="form-control" value="PO-12345" placeholder="%%ATT:TransactionRef%%" />
+      <div class="col-sm shadow p-2 m-2">
+        <input id="transactionRef" type="text" class="form-control" value="%%ATT:TransactionRef%%" placeholder="%%ATT:TransactionRef%%" />
       </div>
 
       <!-- QR CODE COLUMN -->
-      <div class="col-sm-2 shadow p-2 mb-2 text-center">
+      <div class="col-2 shadow p-2 m-2 text-center">
         <div id="qrLandingZone" class="d-inline-flex"></div>
       </div>
 
     </div>
-  </div> <!-- end parent div -->
+  </div> <!-- end parent div container -->
  
 </body>
 
@@ -85,17 +87,6 @@
     function genQR(textVal){
       //Update the qrParams object with the new content value.
       qrParams.content = textVal
-
-      //if(typeof transactionRefQR != 'undefined'){
-        //The parameters of the QRCode object can be updated individually.
-        //transactionRefQR.options.content = textVal
-        //console.log(transactionRefQR.options)
-        //console.log(`transactionRefQR's constructor is: ${transactionRefQR.constructor}`)
-        //console.log(`transactionRefQR's descriptors are: ${Object.getOwnPropertyDescriptors(transactionRefQR)}`)
-        //console.log(`transactionRefQR's Propertydescriptors are: ${Object.getOwnPropertyDescriptors(transactionRefQR,'modules').set}`)
-        //console.log(`transactionRefQR's Propertydescriptors are: ${Object.getOwnPropertyDescriptors(transactionRefQR,'modules').options}`)
-      //}
-      console.log(`The QR object is of type: ${typeof(transactionRefQR)}`)
       $('#qrLandingZone').empty() //Clear the inner html of the qrLandingZone div.
       transactionRefQR = null //set it as null for safety
       transactionRefQR = new QRCode(qrParams) //generate a new QRCode object
