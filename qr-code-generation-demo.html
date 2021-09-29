@@ -47,6 +47,102 @@
       </div>
 
     </div>
+
+<!-- ######################################################################################################################## -->
+    <!-- DEMO ROW OF BARCODE (USES INPUT FROM ABOVE LINE) -->
+    <div class="row m-2 p-2">
+      <script type="text/javascript">
+        // barcodeTarget is just the string matching the id of the html element that'll be the target
+        function generateBarcode(barcodeValue, barcodeTarget) {
+
+            var value = barcodeValue
+            //var btype = $("input[name=btype]:checked").val();
+            var btype = 'code128'
+            var renderer = $("input[name=renderer]:checked").val();
+
+            var quietZone = false;
+            if ($("#quietzone").is(':checked') || $("#quietzone").attr('checked')) {
+                quietZone = true;
+            }
+
+            var settings = {
+                output: renderer,
+            //     bgColor: $("#bgColor").val(),
+            //     color: $("#color").val(),
+            //     barWidth: $("#barWidth").val(),
+            //     //barHeight: $("#barHeight").val(),
+            //     moduleSize: $("#moduleSize").val(),
+            //     posX: $("#posX").val(),
+            //     posY: $("#posY").val()
+                addQuietZone: $("#quietZoneSize").val()
+            };
+            if ($("#rectangular").is(':checked') || $("#rectangular").attr('checked')) {
+                value = { code: value, rect: true };
+            }
+
+            //      var objBarcodeTarget = document.getElementById( barcodeTarget );
+
+            $("#" + barcodeTarget).html("").show().barcode(value, btype, settings);
+            //         objBarcodeTarget.html("").show().barcode(value, btype, settings);
+        }
+
+        function showConfig1D() {
+            $('.config .barcode1D').show();
+            $('.config .barcode2D').hide();
+        }
+
+        function showConfig2D() {
+            $('.config .barcode1D').hide();
+            $('.config .barcode2D').show();
+        }
+
+        function clearCanvas() {
+            var canvas = $('#canvasTarget').get(0);
+            var ctx = canvas.getContext('2d');
+            ctx.lineWidth = 1;
+            ctx.lineCap = 'butt';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.strokeStyle = '#000000';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+        }
+
+        $(function () {
+            $('input[name=btype]').click(function () {
+                if ($(this).attr('id') == 'datamatrix') showConfig2D(); else showConfig1D();
+            });
+            $('input[name=renderer]').click(function () {
+                if ($(this).attr('id') == 'canvas') $('#miscCanvas').show(); else $('#miscCanvas').hide();
+            });
+            generateBarcode();
+        });
+
+      </script>
+      <!-- <script type="text/javascript" src="/scripts/apps/barcodes/jquery-barcode-2.0.2.min.js"></script> -->
+      <script type="text/javascript" src="jquery-barcode-2.0.2.min.js"></script>
+
+      <!-- BARCODE (CODE 128) COLUMN -->
+      <div class="col-sm shadow p-2 m-2">
+        <input type="radio" id="codeType" name="btype" value="code128" checked="" style="display: none;">
+        <input type="hidden" id="bgColor" value="#FFFFFF" size="7">
+        <input type="hidden" id="color" value="#000000" size="7">
+        <input type="hidden" id="barWidth" value="2" size="4">
+        <input type="hidden" id="barHeight" value="40" size="4">
+        <input type="radio" id="css" name="renderer" value="css" checked="checked" style="display: none;">
+
+        <div id="code128Target" class="barcodeTarget">A barcode should be here...</div>
+
+      </div> 
+
+
+      <!-- SPACE-FILLER COLUMN -->
+      <div class="col-2 shadow p-2 m-2 text-center">
+        Nothing here...
+      </div>
+<!-- ######################################################################################################################## -->
+
+    </div>
   </div> <!-- end parent div container -->
  
 </body>
@@ -58,7 +154,10 @@
     "use strict"; // See "Why Strict Mode?" at https://www.w3schools.com/js/js_strict.asp
 
     //Listen for input events on the input box
-    document.querySelector('#transactionRef').addEventListener('input',(event) => {genQR(event.target.value)})
+    document.querySelector('#transactionRef').addEventListener('input',(event) => {
+      genQR(event.target.value);
+      generateBarcode(event.target.value,"code128Target");
+    })
 
     //declared outside the document ready section so no runtime errors are thrown.
     var transactionRefQR, qrParams, trRefSvg
@@ -80,7 +179,9 @@
     }; 
 
       //So a QR gets generated at runtime
-      genQR($('#transactionRef').val())
+      genQR($('#transactionRef').val());
+      generateBarcode($('#transactionRef').val(),"code128Target");
+      console.log($('#transactionRef').val().match(/\w*/g).join(''));
     });
 
 
