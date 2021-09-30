@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script type="text/javascript" src="qr-code-generator.js"></script>
+  <!-- <script type="text/javascript" src="qr-code-generator.js"></script> -->
+  <!-- Converted from GitHub version via https://www.jsdelivr.com/github -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/iLikeToBeAnonymous/QR-Code-and-Code-128-Playground@code128/qr-code-generator.js"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 </head>
@@ -53,7 +55,7 @@
     <div class="row m-2 p-2">
       <script type="text/javascript">
         // barcodeTarget is just the string matching the id of the html element that'll be the target
-        function generateBarcode(barcodeValue, barcodeTarget) {
+        /*function generateBarcode(barcodeValue, barcodeTarget) {
 
             var value = barcodeValue
             //var btype = $("input[name=btype]:checked").val();
@@ -84,7 +86,7 @@
 
             $("#" + barcodeTarget).html("").show().barcode(value, btype, settings);
             //         objBarcodeTarget.html("").show().barcode(value, btype, settings);
-        }
+        } 
 
         function showConfig1D() {
             $('.config .barcode1D').show();
@@ -116,7 +118,7 @@
                 if ($(this).attr('id') == 'canvas') $('#miscCanvas').show(); else $('#miscCanvas').hide();
             });
             generateBarcode();
-        });
+        });*/
 
       </script>
       <!-- <script type="text/javascript" src="/scripts/apps/barcodes/jquery-barcode-2.0.2.min.js"></script> -->
@@ -156,32 +158,41 @@
     //Listen for input events on the input box
     document.querySelector('#transactionRef').addEventListener('input',(event) => {
       genQR(event.target.value);
-      generateBarcode(event.target.value,"code128Target");
+      //generateBarcode(event.target.value,"code128Target");
+      $('#code128Target').barcode(event.target.value,'code128',barcodeSettings);
     })
 
     //declared outside the document ready section so no runtime errors are thrown.
-    var transactionRefQR, qrParams, trRefSvg
+    var transactionRefQR, qrParams, trRefSvg, barcodeSettings
 
     //QR specific functions don't run until the page is ready in case the QR js is loaded last.
     $(document).ready( ()=>{
     // //Define size and error checking of qr code
-    qrParams = {
-      content: $('#transactionRef').val(),
-      width: 100, height: 100, //these params need to be put on the viewBox like: viewBox="0 0 100px 100px"
-      color: '#000000',
-      background: '#ffffff', 
-      ecl: 'H', //approximately 30% restoration, the highest level.
-      //for the "container" param, val of "svg" will be according to the width and height params, but 
-      //"svg-viewbox" is responsive and will dynamically resize to the container regardless of the width and height params.
-      container: 'svg', 
-      join: true,
-      force: true
-    }; 
+      qrParams = {
+        content: $('#transactionRef').val(),
+        width: 100, height: 100, //these params need to be put on the viewBox like: viewBox="0 0 100px 100px"
+        color: '#000000',
+        background: '#ffffff', 
+        ecl: 'H', //approximately 30% restoration, the highest level.
+        //for the "container" param, val of "svg" will be according to the width and height params, but 
+        //"svg-viewbox" is responsive and will dynamically resize to the container regardless of the width and height params.
+        container: 'svg', 
+        join: true,
+        force: true
+      }; 
+
+      barcodeSettings = {
+        barWidth: 2,
+        barHeight: 77,
+        showHRI: false,
+        output: 'css'
+      };
 
       //So a QR gets generated at runtime
       genQR($('#transactionRef').val());
-      generateBarcode($('#transactionRef').val(),"code128Target");
-      console.log($('#transactionRef').val().match(/\w*/g).join(''));
+      // generateBarcode($('#transactionRef').val(),"code128Target");
+      $('#code128Target').barcode($('#transactionRef').val(),'code128',barcodeSettings);
+      //console.log($('#transactionRef').val().match(/\w*/g).join(''));
     });
 
 
