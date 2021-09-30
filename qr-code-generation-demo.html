@@ -159,7 +159,8 @@
     document.querySelector('#transactionRef').addEventListener('input',(event) => {
       genQR(event.target.value);
       //generateBarcode(event.target.value,"code128Target");
-      $('#code128Target').barcode(event.target.value,'code128',barcodeSettings);
+      //$('#code128Target').barcode(event.target.value,'code128',barcodeSettings);
+      gen1DBar(event.target.value,'code128Target')
     })
 
     //declared outside the document ready section so no runtime errors are thrown.
@@ -181,30 +182,60 @@
         force: true
       }; 
 
-      barcodeSettings = {
-        barWidth: 2,
-        barHeight: 77,
-        showHRI: false,
-        output: 'css'
-      };
+      // barcodeSettings = {
+      //   barWidth: 2,
+      //   barHeight: 77,
+      //   showHRI: false,
+      //   output: 'css'
+      // };
 
       //So a QR gets generated at runtime
       genQR($('#transactionRef').val());
       // generateBarcode($('#transactionRef').val(),"code128Target");
-      $('#code128Target').barcode($('#transactionRef').val(),'code128',barcodeSettings);
+      //$('#code128Target').barcode($('#transactionRef').val(),'code128',barcodeSettings);
+      gen1DBar($('#transactionRef').val(),'code128Target');
       //console.log($('#transactionRef').val().match(/\w*/g).join(''));
     });
 
 
     function genQR(textVal){
-      //Update the qrParams object with the new content value.
-      qrParams.content = textVal
-      $('#qrLandingZone').empty() //Clear the inner html of the qrLandingZone div.
-      transactionRefQR = null //set it as null for safety
-      transactionRefQR = new QRCode(qrParams) //generate a new QRCode object
-      //...and from it generate a new svg and display it in the qrLandingZone div.
-      $('#qrLandingZone').html(transactionRefQR.svg());
+      if (typeof(textVal) != 'string'){textVal = String(textVal)};
+      if (textVal.length > 0)  {//Update the qrParams object with the new content value.
+        qrParams.content = textVal
+        $('#qrLandingZone').empty() //Clear the inner html of the qrLandingZone div.
+        transactionRefQR = null //set it as null for safety
+        transactionRefQR = new QRCode(qrParams) //generate a new QRCode object
+        //...and from it generate a new svg and display it in the qrLandingZone div.
+        $('#qrLandingZone').html(transactionRefQR.svg());
+      } else {
+        console.log('NO VALUE TO CONVERT TO QR CODE');
+        $('#qrLandingZone').html('NULL');
+      };
     };
+
+    function gen1DBar(barcodeValue, targetIdStr){
+      if (typeof(barcodeValue) != 'string'){barcodeValue = String(barcodeValue)};
+      //typeof(targetIdStr) != 'string' ? targetIdStr = String(targetIdStr);
+      //barcodeValue.length > 0 ? console.log('barcodeValue length is ' + barcodeValue.length + ' at ' + Date.now()) : console.log('NO VALUE TO CONVERT TO BARCODE');
+      if (barcodeValue.length > 0) {
+        console.log('barcodeValue length is ' + barcodeValue.length + ' at ' + Date.now());
+        
+        let barcodeSettings = {
+          barWidth: 2,
+          barHeight: 77,
+          showHRI: false,
+          output: 'css'
+        };
+        //('#' + targetIdStr).html('').show().barcode(value, btype, settings);
+        //$('#code128Target').barcode($('#transactionRef').val(),'code128',barcodeSettings);
+        $('#'+targetIdStr).barcode(barcodeValue,'code128',barcodeSettings);
+        
+      } else {
+        console.log('NO VALUE TO CONVERT TO BARCODE');
+        $('#'+targetIdStr).html('NULL');
+      };
+    };
+
   </script>
 </footer>
 
