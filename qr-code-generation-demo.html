@@ -37,15 +37,25 @@
 
     <!-- DEMO ROW OF INPUT FOLLOWED BY THE RESULTING QR -->
     <div class="row m-2 p-2">
-      
+  
       <!-- INPUT BOX COLUMN -->
-      <div class="col-sm shadow p-2 m-2">
+      <div class="col shadow p-2 m-2">
         <input id="transactionRef" type="text" class="form-control" value="%%ATT:TransactionRef%%" placeholder="%%ATT:TransactionRef%%" />
       </div>
 
+    </div>
+
+    <!-- DEMO ROW OF INPUT FOLLOWED BY THE RESULTING QR -->
+    <div class="row m-2 p-2">
+      
       <!-- QR CODE COLUMN -->
-      <div class="col-2 shadow p-2 m-2 text-center">
+      <div class="col shadow p-2 m-2">
         <div id="qrLandingZone" class="d-inline-flex"></div>
+      </div>
+
+      <!-- NOTES -->
+      <div class="col shadow p-2 m-2 text-center">
+        QR Code Example (uses code that is separate from <code>jquery-barcode-2.0.2.min.js</code>)
       </div>
 
     </div>
@@ -121,30 +131,36 @@
         });*/
 
       </script>
-      <!-- <script type="text/javascript" src="/scripts/apps/barcodes/jquery-barcode-2.0.2.min.js"></script> -->
-      <script type="text/javascript" src="jquery-barcode-2.0.2.min.js"></script>
+      <script type="text/javascript" src="https://go.cin7.com/scripts/apps/barcodes/jquery-barcode-2.0.2.min.js"></script>
+      <!-- <script type="text/javascript" src="jquery-barcode-2.0.2.min.js"></script> -->
 
       <!-- BARCODE (CODE 128) COLUMN -->
-      <div class="col-sm shadow p-2 m-2">
-        <input type="radio" id="codeType" name="btype" value="code128" checked="" style="display: none;">
-        <input type="hidden" id="bgColor" value="#FFFFFF" size="7">
-        <input type="hidden" id="color" value="#000000" size="7">
-        <input type="hidden" id="barWidth" value="2" size="4">
-        <input type="hidden" id="barHeight" value="40" size="4">
-        <input type="radio" id="css" name="renderer" value="css" checked="checked" style="display: none;">
-
+      <div class="col shadow p-2 m-2">
         <div id="code128Target" class="barcodeTarget">A barcode should be here...</div>
-
       </div> 
 
-
-      <!-- SPACE-FILLER COLUMN -->
-      <div class="col-2 shadow p-2 m-2 text-center">
-        Nothing here...
+      <!-- NOTES COLUMN -->
+      <div class="col shadow p-2 m-2 text-center">
+        Code128 Example
       </div>
+    </div>
+<!-- ######################################################################################################################## -->
+<!-- ######################################################################################################################## -->
+    <div class="row m-2 p-2">
+
+      <!-- DATAMATRIX (2D) COLUMN -->
+      <div class="col shadow p-2 m-2">
+        <div id="datamatrixTarget" class="barcodeTarget">A barcode should be here...</div>
+      </div> 
+
+      <!-- NOTES COLUMN -->
+      <div class="col shadow p-2 m-2 text-center">
+        Datamatrix (ASCII + extended) example
+      </div>
+    </div>
 <!-- ######################################################################################################################## -->
 
-    </div>
+
   </div> <!-- end parent div container -->
  
 </body>
@@ -160,7 +176,8 @@
       genQR(event.target.value);
       //generateBarcode(event.target.value,"code128Target");
       //$('#code128Target').barcode(event.target.value,'code128',barcodeSettings);
-      gen1DBar(event.target.value,'code128Target')
+      gen1DBar(event.target.value,'code128Target');
+      genDatamatrix(event.target.value,'datamatrixTarget');
     })
 
     //declared outside the document ready section so no runtime errors are thrown.
@@ -195,6 +212,7 @@
       //$('#code128Target').barcode($('#transactionRef').val(),'code128',barcodeSettings);
       gen1DBar($('#transactionRef').val(),'code128Target');
       //console.log($('#transactionRef').val().match(/\w*/g).join(''));
+      genDatamatrix($('#transactionRef').val(),'datamatrixTarget');
     });
 
 
@@ -208,17 +226,17 @@
         //...and from it generate a new svg and display it in the qrLandingZone div.
         $('#qrLandingZone').html(transactionRefQR.svg());
       } else {
-        console.log('NO VALUE TO CONVERT TO QR CODE');
+        // console.log('NO VALUE TO CONVERT TO QR CODE');
         $('#qrLandingZone').html('NULL');
       };
     };
 
-    function gen1DBar(barcodeValue, targetIdStr){
-      if (typeof(barcodeValue) != 'string'){barcodeValue = String(barcodeValue)};
+    function gen1DBar(textVal, targetIdStr){
+      if (typeof(textVal) != 'string'){textVal = String(textVal)};
       //typeof(targetIdStr) != 'string' ? targetIdStr = String(targetIdStr);
-      //barcodeValue.length > 0 ? console.log('barcodeValue length is ' + barcodeValue.length + ' at ' + Date.now()) : console.log('NO VALUE TO CONVERT TO BARCODE');
-      if (barcodeValue.length > 0) {
-        console.log('barcodeValue length is ' + barcodeValue.length + ' at ' + Date.now());
+      //textVal.length > 0 ? console.log('textVal length is ' + textVal.length + ' at ' + Date.now()) : console.log('NO VALUE TO CONVERT TO BARCODE');
+      if (textVal.length > 0) {
+        // console.log('textVal length is ' + textVal.length + ' at ' + Date.now());
         
         let barcodeSettings = {
           barWidth: 2,
@@ -228,14 +246,35 @@
         };
         //('#' + targetIdStr).html('').show().barcode(value, btype, settings);
         //$('#code128Target').barcode($('#transactionRef').val(),'code128',barcodeSettings);
-        $('#'+targetIdStr).barcode(barcodeValue,'code128',barcodeSettings);
+        $('#'+targetIdStr).barcode(textVal,'code128',barcodeSettings);
         
       } else {
-        console.log('NO VALUE TO CONVERT TO BARCODE');
+        // console.log('NO VALUE TO CONVERT TO BARCODE');
         $('#'+targetIdStr).html('NULL');
       };
     };
 
+    function genDatamatrix(textVal, targetIdStr){
+      if (typeof(textVal) != 'string'){textVal = String(textVal)};
+      //typeof(targetIdStr) != 'string' ? targetIdStr = String(targetIdStr);
+      //textVal.length > 0 ? console.log('textVal length is ' + textVal.length + ' at ' + Date.now()) : console.log('NO VALUE TO CONVERT TO BARCODE');
+      if (textVal.length > 0) {
+        // console.log('textVal length is ' + textVal.length + ' at ' + Date.now());
+        
+        let barcodeSettings = {
+          showHRI: false,
+          moduleSize: 4,
+          output: 'css'
+        };
+        //('#' + targetIdStr).html('').show().barcode(value, btype, settings);
+        //$('#code128Target').barcode($('#transactionRef').val(),'code128',barcodeSettings);
+        $('#'+targetIdStr).barcode(textVal,'datamatrix',barcodeSettings);
+        
+      } else {
+        // console.log('NO VALUE TO CONVERT TO BARCODE');
+        $('#'+targetIdStr).html('NULL');
+      };
+    };
   </script>
 </footer>
 
