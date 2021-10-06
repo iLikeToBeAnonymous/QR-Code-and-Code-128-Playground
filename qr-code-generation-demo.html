@@ -131,7 +131,7 @@
         });*/
 
       </script>
-      <script type="text/javascript" src="https://go.cin7.com/scripts/apps/barcodes/jquery-barcode-2.0.2.min.js"></script>
+      <script type="text/javascript" src="https://go.cin7.com/scripts/apps/barcodes/jquery-barcode-2.0.2.min.js"></script> <!--http://barcode-coder.com/-->
       <!-- <script type="text/javascript" src="jquery-barcode-2.0.2.min.js"></script> -->
 
       <!-- BARCODE (CODE 128) COLUMN -->
@@ -239,9 +239,10 @@
         // console.log('textVal length is ' + textVal.length + ' at ' + Date.now());
         
         let barcodeSettings = {
-          barWidth: 2,
-          barHeight: 77,
-          showHRI: false,
+          barWidth: 1,
+          barHeight: 50,
+          showHRI: true,
+          fontSize: 10,
           output: 'css'
         };
         //('#' + targetIdStr).html('').show().barcode(value, btype, settings);
