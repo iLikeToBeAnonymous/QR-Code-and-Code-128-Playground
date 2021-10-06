@@ -78,12 +78,15 @@
                     <th style="text-align: center; width: 10%;">Qty</th>
                 </tr>
             </thead>
-        <!--Loop Starts: Items-->
             <tbody>
+                <!--Loop Starts: Items-->
                 <tr>
                     <td style="text-align: left; overflow-wrap: break-word; width: 25%;">
-                        <img id="item-image" src="/webfiles/ShoppingCartCurrency/webpages/images/12236/%%Loop:Image%%" alt="" 
-                        style="border: 0px; max-width: 40px;" class="fr-fic fr-dii">
+                        <!-- In the "src" section below, the colon in %%Loop:Image%% gets replaced by the editor for some reason, so it needs to 
+                        be manually corrected in the browser's inspector before submitting to the "save" button. -->
+                        <img class="lineitem-img fr-fic fr-dii" id="item-image" 
+                            src="/webfiles/PetitAutoWashEquUS/webpages/images/950322/%%Loop:Image%%"
+                            style="border: 0px; max-width: 40px;">
                     </td>
                     <td style="text-align: left; overflow-wrap: break-word; width: 20%;">%%Loop:Code%%</td>
                     <td style="text-align: left; overflow-wrap: break-word; width: 25%;">%%Loop:Name%%</td>
@@ -94,8 +97,9 @@
                     <td colspan="3">&nbsp;</td>
                     <td colspan="2">%%SizeGrid%%</td>
                 </tr>
+                <!--Loop Ends: Items-->
             </tbody>
-        </table><!--Loop Ends: Items-->
+        </table>
         </span>
     </div>
     <div style="margin: 20px 0; border-bottom: solid 1px gray; width: 100%;">
@@ -193,8 +197,12 @@
     <!-- This is the original line for the barcode. Note that it does not include any code to generate this. Instead, the 
     code to generate the barcode is run somewhere for the page after the template is loaded based on id "orderRefBarcode" -->
     <!-- <div id="orderRefBarcode">%%OrderRefBarcode%%</div>  -->
-    <div id="transactionRefBarcode">There should be a barcode here...</div>
-    <div id="transactionRefQr">There should be a QR code here...</div>
+    
+    <table style="text-align: center; vertical-align: middle;">
+        <td id="transactionRefBarcode">There should be a barcode here...</td>
+        <td id="transactionRefQr">There should be a QR code here...</td>
+    </table>
+
     <script type="text/javascript" src="https://go.cin7.com/scripts/apps/barcodes/jquery-barcode-2.0.2.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/iLikeToBeAnonymous/QR-Code-and-Code-128-Playground@code128/qr-code-generator.js"></script>
     <script>
