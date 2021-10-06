@@ -18,19 +18,19 @@
         <!--Template Ends: Header-->
         <div id="edit-section-header-details">
 
-            <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+            <table style="border: 1px solid; text-align: left; border-collapse: collapse;" cellpadding="0" cellspacing="0" width="100%">
                 <thead>
                     <tr>
-                        <th style="border-left: 1px solid rgb(221, 221, 221); text-align: left; width: 33%;">ETD</th>
-                        <th style="border-left: 1px solid rgb(221, 221, 221); text-align: left; width: 33%;">Ref</th>
-                        <th style="border-left: 1px solid rgb(221, 221, 221); text-align: left; width: 34%;">Customer PO No</th>
+                        <th style="border: 1px solid;">ETD</th>
+                        <th style="border: 1px solid;">Ref</th>
+                        <th style="border: 1px solid;">Customer PO No</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="border-left: 1px solid rgb(221, 221, 221);">%%ATT:DueDate%%</td>
-                        <td id="transactionRefDonor" style="border-left: 1px solid rgb(221, 221, 221);">%%ATT:TransactionRef%%</td>
-                        <td style="border-left: 1px solid rgb(221, 221, 221);">%%ATT:CustomerRef%%</td>
+                        <td style="border: 1px solid rgb(221, 221, 221);">%%ATT:DueDate%%</td>
+                        <td id="transactionRefDonor" style="border: 1px solid rgb(221, 221, 221);">%%ATT:TransactionRef%%</td>
+                        <td style="border: 1px solid rgb(221, 221, 221);">%%ATT:CustomerRef%%</td>
                     </tr>
                 </tbody>
             </table>
@@ -40,7 +40,7 @@
     <!--<a href="/rsfa.asp?idWebPage=950320&idPetitAutoWashEquUS_Orders=%%ATT:OrderId%%&SID=%%ATT:SessionId%%&idWebSite=22205&UN=ti&Admin=True"><font size=3>Pay Invoice Online</font></a>-->
     <div class="edit-section" id="edit-section-address">
 
-        <table border="0" cellpadding="0" cellspacing="5" width="100%">
+        <table style="border: 1px solid; text-align: left;" cellpadding="0" cellspacing="5" width="100%">
             <tbody>
                 <tr valign="top">
                     <td align="left" valign="top" width="50%">
@@ -48,9 +48,7 @@
                             <div class="primary-colour"><strong>Customer:</strong></div>
                             <div><strong>%%ATT:BillingCompany%%</strong> %%ATT:BillingRecipient%% %%ATT:BillingAddressDetails%%
 
-                                <p id="contact-details">
-                                    <br>
-                                </p>
+                                <p id="contact-details"><br></p>
                             </div>
                         </div>
                     </td>
@@ -68,7 +66,38 @@
         </table>
     </div>
     <br>
-    <div class="edit-section" id="edit-section-lineitems"><span><table border="0" cellpadding="2" cellspacing="0" class="lineitems" style="width: 100%; break-inside: avoid; table-layout: fixed;"><thead><tr><th style="background-color: rgb(243, 243, 243); border-top: 1px solid rgb(221, 221, 221); text-align: left; width: 25%;"><br></th><th style="background-color: rgb(243, 243, 243); border-top: 1px solid rgb(221, 221, 221); text-align: left; width: 20%;">Code</th><th style="background-color: rgb(243, 243, 243); border-top: 1px solid rgb(221, 221, 221); text-align: left; width: 25%;">Item</th><th style="background-color: rgb(243, 243, 243); border-top: 1px solid rgb(221, 221, 221); text-align: left; width: 20%;">Options</th><th style="background-color: rgb(243, 243, 243); border-top: 1px solid rgb(221, 221, 221); text-align: right; width: 10%;">Qty</th></tr></thead></table><!--Loop Starts: Items--><table border="0" cellpadding="2" cellspacing="0" class="lineitems" style="width: 100%; break-inside: avoid; table-layout: fixed;"><tbody><tr><td style="text-align: left; overflow-wrap: break-word; width: 25%;"><img id="item-image" src="/webfiles/ShoppingCartCurrency/webpages/images/12236/%%Loop:Image%%" alt="" style="border: 0px; max-width: 40px;" class="fr-fic fr-dii"></td><td style="text-align: left; overflow-wrap: break-word; width: 20%;">%%Loop:Code%%</td><td style="text-align: left; overflow-wrap: break-word; width: 25%;">%%Loop:Name%%</td><td style="text-align: left; overflow-wrap: break-word; width: 20%;">%%Loop:Variations%%</td><td style="text-align: right; overflow-wrap: break-word; width: 10%;">%%Loop:ExchangeQty%%</td></tr><tr id="size-grid-row"><td colspan="3">&nbsp;</td><td colspan="2">%%SizeGrid%%</td></tr></tbody></table><!--Loop Ends: Items--></span></div>
+    <div class="edit-section" id="edit-section-lineitems">
+        <span>
+        <table border="1" cellpadding="2" cellspacing="0" class="lineitems" style="width: 100%; border-collapse: collapse; break-inside: avoid; table-layout: fixed; border: 1px solid rgb(221, 221, 221); ">
+            <thead>
+                <tr style="background-color: rgb(243, 243, 243); border: 1px solid rgb(221, 221, 221); text-align: left;">
+                    <th style="width: 25%;">Item Image</th>
+                    <th style="width: 20%;">Code</th>
+                    <th style="width: 25%;">Item</th>
+                    <th style="width: 20%;">Options</th>
+                    <th style="text-align: center; width: 10%;">Qty</th>
+                </tr>
+            </thead>
+        <!--Loop Starts: Items-->
+            <tbody>
+                <tr>
+                    <td style="text-align: left; overflow-wrap: break-word; width: 25%;">
+                        <img id="item-image" src="/webfiles/ShoppingCartCurrency/webpages/images/12236/%%Loop:Image%%" alt="" 
+                        style="border: 0px; max-width: 40px;" class="fr-fic fr-dii">
+                    </td>
+                    <td style="text-align: left; overflow-wrap: break-word; width: 20%;">%%Loop:Code%%</td>
+                    <td style="text-align: left; overflow-wrap: break-word; width: 25%;">%%Loop:Name%%</td>
+                    <td style="text-align: left; overflow-wrap: break-word; width: 20%;">%%Loop:Variations%%</td>
+                    <td style="text-align: center; overflow-wrap: break-word; width: 10%;">%%Loop:ExchangeQty%%</td>
+                </tr>
+                <tr id="size-grid-row">
+                    <td colspan="3">&nbsp;</td>
+                    <td colspan="2">%%SizeGrid%%</td>
+                </tr>
+            </tbody>
+        </table><!--Loop Ends: Items-->
+        </span>
+    </div>
     <div style="margin: 20px 0; border-bottom: solid 1px gray; width: 100%;">
         <br>
     </div>
@@ -165,7 +194,9 @@
     code to generate the barcode is run somewhere for the page after the template is loaded based on id "orderRefBarcode" -->
     <!-- <div id="orderRefBarcode">%%OrderRefBarcode%%</div>  -->
     <div id="transactionRefBarcode">There should be a barcode here...</div>
+    <div id="transactionRefQr">There should be a QR code here...</div>
     <script type="text/javascript" src="https://go.cin7.com/scripts/apps/barcodes/jquery-barcode-2.0.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/iLikeToBeAnonymous/QR-Code-and-Code-128-Playground@code128/qr-code-generator.js"></script>
     <script>
         $(document).ready( ()=>{
             console.log('Inside document ready function');
@@ -178,6 +209,22 @@
                 output: 'css'
             };
             $('#transactionRefBarcode').barcode(barcodeTextVal,'code128',barcodeSettings);
+
+            let qrParams = {
+                content: barcodeTextVal,
+                width: 100, height: 100, //these params need to be put on the viewBox like: viewBox="0 0 100px 100px"
+                color: '#000000',
+                background: '#ffffff', 
+                ecl: 'H', //approximately 30% restoration, the highest level.
+                //for the "container" param, val of "svg" will be according to the width and height params, but 
+                //"svg-viewbox" is responsive and will dynamically resize to the container regardless of the width and height params.
+                container: 'svg', 
+                join: true,
+                force: true
+            }; 
+            let transactionRefQR = new QRCode(qrParams) //generate a new QRCode object
+            $('#transactionRefQr').html(transactionRefQR.svg()); 
+
         });        
 
     </script>
